@@ -4,41 +4,41 @@ provider "azurerm" {
 }
 
 # Create a resource group
-resource "azurerm_resource_group" "jenkins" {
-  name     = "jenkins-resources"
+resource "azurerm_resource_group" "podman" {
+  name     = "podman-resources"
   location = "westus"
 }
 
 # Create virtual network
-resource "azurerm_virtual_network" "jenkins" {
+resource "azurerm_virtual_network" "podman" {
   name                = "acctvn"
   address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.jenkins.location
-  resource_group_name = azurerm_resource_group.jenkins.name
+  location            = azurerm_resource_group.podman.location
+  resource_group_name = azurerm_resource_group.podman.name
 }
 
 # Create subnet
-resource "azurerm_subnet" "jenkins" {
+resource "azurerm_subnet" "podman" {
   name                 = "acctsub"
-  resource_group_name  = azurerm_resource_group.jenkins.name
-  virtual_network_name = azurerm_virtual_network.jenkins.name
+  resource_group_name  = azurerm_resource_group.podman.name
+  virtual_network_name = azurerm_virtual_network.podman.name
   address_prefix       = "10.0.2.0/24"
 }
 
 # Create public IP Address
-resource "azurerm_public_ip" "jenkins" {
+resource "azurerm_public_ip" "podman" {
   name                = "publicip"
-  location            = azurerm_resource_group.jenkins.location
-  resource_group_name = azurerm_resource_group.jenkins.name
+  location            = azurerm_resource_group.podman.location
+  resource_group_name = azurerm_resource_group.podman.name
   allocation_method   = "Static"
 }
 
 
 # Create Network Security Group and rule
-resource "azurerm_network_security_group" "jenkins" {
+resource "azurerm_network_security_group" "podman" {
   name                = "nsg"
-  location            = azurerm_resource_group.jenkins.location
-  resource_group_name = azurerm_resource_group.jenkins.name
+  location            = azurerm_resource_group.podman.location
+  resource_group_name = azurerm_resource_group.podman.name
 
   security_rule {
     name                       = "SSH"
@@ -54,27 +54,27 @@ resource "azurerm_network_security_group" "jenkins" {
 }
 
 # Create virtual network interface
-resource "azurerm_network_interface" "jenkins" {
+resource "azurerm_network_interface" "podman" {
   name                = "acctni"
-  location            = azurerm_resource_group.jenkins.location
-  resource_group_name = azurerm_resource_group.jenkins.name
-  network_security_group_id = azurerm_network_security_group.jenkins.id
+  location            = azurerm_resource_group.podman.location
+  resource_group_name = azurerm_resource_group.podman.name
+  network_security_group_id = azurerm_network_security_group.podman.id
 
   ip_configuration {
     name                          = "testconfiguration1"
-    subnet_id                     = azurerm_subnet.jenkins.id
+    subnet_id                     = azurerm_subnet.podman.id
     private_ip_address_allocation = "dynamic"
-    public_ip_address_id          = azurerm_public_ip.jenkins.id
+    public_ip_address_id          = azurerm_public_ip.podman.id
   }
 }
 
 # Create a Linux virtual machine
 
-resource "azurerm_virtual_machine" "jenkins" {
+resource "azurerm_virtual_machine" "podman" {
   name                  = "acctvm"
-  location              = azurerm_resource_group.jenkins.location
-  resource_group_name   = azurerm_resource_group.jenkins.name
-  network_interface_ids = [azurerm_network_interface.jenkins.id]
+  location              = azurerm_resource_group.podman.location
+  resource_group_name   = azurerm_resource_group.podman.name
+  network_interface_ids = [azurerm_network_interface.podman.id]
   vm_size               = "Standard_B1s"
 
   storage_image_reference {
@@ -92,7 +92,7 @@ resource "azurerm_virtual_machine" "jenkins" {
   }
 
   os_profile {
-    computer_name  = "master-jenkins"
+    computer_name  = "master-podman"
     admin_username = "azurebitra"
     admin_password = "Password1234!"
   }
@@ -108,5 +108,5 @@ resource "azurerm_virtual_machine" "jenkins" {
 }
 
 output "ip" {
-  value = azurerm_public_ip.jenkins.ip_address
+  value = azurerm_public_ip.podman.ip_address
 }
