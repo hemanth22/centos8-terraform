@@ -80,7 +80,7 @@ resource "azurerm_virtual_machine" "podman" {
   storage_image_reference {
     publisher = "OpenLogic"
     offer     = "CentOS"
-    sku       = "7.7"
+    sku       = "8_2-gen2"
     version   = "latest"
   }
 
